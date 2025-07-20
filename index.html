@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Prayer-Based Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .prayer-times {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .prayer-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            color: #f1f5f9;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .prayer-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .prayer-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .prayer-card .time {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .schedule-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .block {
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.3;
+        }
+
+        .block:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .block.sleep { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .block.morning { 
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: #f1f5f9;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .block.afternoon { 
+            background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 100%);
+            color: #f1f5f9;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        .block.evening { 
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #f1f5f9;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .block.night { 
+            background: linear-gradient(135deg, #701a75 0%, #86198f 100%);
+            color: #f1f5f9;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        
+        .block.prayer { 
+            background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+            color: #f0fdf4;
+            border: 2px solid #10b981;
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.2);
+        }
+
+        .block.prayer::before {
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            opacity: 0.4;
+        }
+
+        .block-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .block-icon {
+            font-size: 2.5rem;
+            margin-right: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .activities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .activity {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .activity:hover {
+            background: rgba(15, 23, 42, 0.6);
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .activity-time {
+            font-weight: 600;
+            min-width: 130px;
+            margin-right: 20px;
+            font-size: 0.95rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .prayer-activity {
+            background: rgba(5, 46, 22, 0.6) !important;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .prayer-activity .activity-time {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .metrics {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 35px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .metrics h3 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .metric-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+        }
+
+        .metric-item div:first-child {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .metric-item div:last-child {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .current-time {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.9);
+            color: #f1f5f9;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .activities {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="current-time" id="currentTime"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🕌 Daily Prayer-Based Schedule</h1>
+            <p>Organized around the five daily prayers with optimal work-life balance</p>
+        </div>
+
+        <div class="prayer-times">
+            <div class="prayer-card">
+                <h3>🌅 Fajr</h3>
+                <div class="time">5:00 - 5:30 AM</div>
+            </div>
+            <div class="prayer-card">
+                <h3>🌞 Zuhr</h3>
+                <div class="time">1:30 - 2:00 PM</div>
+            </div>
+            <div class="prayer-card">
+                <h3>🌇 Asr</h3>
+                <div class="time">5:30 - 6:00 PM</div>
+            </div>
+            <div class="prayer-card">
+                <h3>🌅 Maghrib</h3>
+                <div class="time">7:00 - 7:30 PM</div>
+            </div>
+            <div class="prayer-card">
+                <h3>🌙 Isha</h3>
+                <div class="time">12:30 - 1:00 AM</div>
+            </div>
+        </div>
+
+        <div class="schedule-blocks">
+            <!-- Block 1: Sleep -->
+            <div class="block sleep">
+                <div class="block-header">
+                    <div class="block-icon">🌙</div>
+                    <div>Block 1: 1:00 AM – 5:00 AM</div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <div class="activity-time">1:00–5:00 AM</div>
+                        <div class="activity-task"><strong>Core Sleep (4 hrs)</strong> - Deep rest period</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fajr Prayer Block -->
+            <div class="block prayer">
+                <div class="block-header">
+                    <div class="block-icon">🕌</div>
+                    <div>Fajr Prayer Block</div>
+                </div>
+                <div class="activities">
+                    <div class="activity prayer-activity">
+                        <div class="activity-time">5:00–5:30 AM</div>
+                        <div class="activity-task"><strong>Fajr Prayer</strong> - Morning prayer and meditation</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 2: Morning -->
+            <div class="block morning">
+                <div class="block-header">
+                    <div class="block-icon">🌅</div>
+                    <div>Block 2: 5:30 AM – 1:30 PM</div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <div class="activity-time">5:30–10:00 AM</div>
+                        <div class="activity-task"><strong>Sleep (4.5 hrs)</strong> - Post-Fajr top-up rest</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">10:00–10:30 AM</div>
+                        <div class="activity-task"><strong>Meal 1</strong> - 3 eggs + oats omelette</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">10:30–12:00 PM</div>
+                        <div class="activity-task"><strong>Learning</strong> - MERN/AI course + podcast</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">12:00–1:30 PM</div>
+                        <div class="activity-task"><strong>Work Block 1</strong> - Focused deep work</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zuhr Prayer Block -->
+            <div class="block prayer">
+                <div class="block-header">
+                    <div class="block-icon">🕌</div>
+                    <div>Zuhr Prayer Block</div>
+                </div>
+                <div class="activities">
+                    <div class="activity prayer-activity">
+                        <div class="activity-time">1:30–2:00 PM</div>
+                        <div class="activity-task"><strong>Zuhr Prayer</strong> - Afternoon prayer and reflection</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 3: Afternoon -->
+            <div class="block afternoon">
+                <div class="block-header">
+                    <div class="block-icon">🌞</div>
+                    <div>Block 3: 2:00 PM – 5:30 PM</div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <div class="activity-time">2:00–2:30 PM</div>
+                        <div class="activity-task"><strong>Meal 2</strong> - Chicken/fish, rice/quinoa, veggies</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">2:30–5:30 PM</div>
+                        <div class="activity-task"><strong>Work Block 2</strong> - Main work chunk (3 hrs)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asr Prayer Block -->
+            <div class="block prayer">
+                <div class="block-header">
+                    <div class="block-icon">🕌</div>
+                    <div>Asr Prayer Block</div>
+                </div>
+                <div class="activities">
+                    <div class="activity prayer-activity">
+                        <div class="activity-time">5:30–6:00 PM</div>
+                        <div class="activity-task"><strong>Asr Prayer</strong> - Late afternoon prayer</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 4: Evening -->
+            <div class="block evening">
+                <div class="block-header">
+                    <div class="block-icon">🌇</div>
+                    <div>Block 4: 6:00 PM – 7:00 PM</div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <div class="activity-time">6:00–7:00 PM</div>
+                        <div class="activity-task"><strong>Work Block 3</strong> - Admin tasks and wrap-up</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maghrib Prayer Block -->
+            <div class="block prayer">
+                <div class="block-header">
+                    <div class="block-icon">🕌</div>
+                    <div>Maghrib Prayer Block</div>
+                </div>
+                <div class="activities">
+                    <div class="activity prayer-activity">
+                        <div class="activity-time">7:00–7:30 PM</div>
+                        <div class="activity-task"><strong>Maghrib Prayer</strong> - Evening prayer at sunset</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 5: Night -->
+            <div class="block night">
+                <div class="block-header">
+                    <div class="block-icon">🌙</div>
+                    <div>Block 5: 7:30 PM – 12:30 AM</div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <div class="activity-time">7:30–8:00 PM</div>
+                        <div class="activity-task"><strong>Meal 3 (Pre-workout)</strong> - 2 banana, 2 bread + PB</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">8:00–9:30 PM</div>
+                        <div class="activity-task"><strong>Gym Session</strong> - Physical exercise and fitness</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">9:30–10:00 PM</div>
+                        <div class="activity-task"><strong>Meal 4 (Post-workout)</strong> - Lean meat + sweet potato</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">10:00–11:00 PM</div>
+                        <div class="activity-task"><strong>Work Block 4</strong> - Final wrap-up tasks</div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-time">11:00–12:30 AM</div>
+                        <div class="activity-task"><strong>Spare Time</strong> - Relax, light screen/family time</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Isha Prayer Block -->
+            <div class="block prayer">
+                <div class="block-header">
+                    <div class="block-icon">🕌</div>
+                    <div>Isha Prayer Block</div>
+                </div>
+                <div class="activities">
+                    <div class="activity prayer-activity">
+                        <div class="activity-time">12:30–1:00 AM</div>
+                        <div class="activity-task"><strong>Isha Prayer</strong> - Night prayer before sleep</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <h3>✅ Daily Metrics Recap</h3>
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div>💤 Sleep</div>
+                    <div>8.5 hrs (4 + 4.5)</div>
+                </div>
+                <div class="metric-item">
+                    <div>💼 Work</div>
+                    <div>7 hrs</div>
+                </div>
+                <div class="metric-item">
+                    <div>📚 Learning</div>
+                    <div>1.5 hrs</div>
+                </div>
+                <div class="metric-item">
+                    <div>🏋️ Gym</div>
+                    <div>1.5 hrs</div>
+                </div>
+                <div class="metric-item">
+                    <div>🍽️ Meals</div>
+                    <div>4 meals</div>
+                </div>
+                <div class="metric-item">
+                    <div>🕌 Prayers</div>
+                    <div>5 prayers</div>
+                </div>
+                <div class="metric-item">
+                    <div>⏰ Spare Time</div>
+                    <div>1.5 hrs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: true,
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Add smooth scrolling for better user experience
+        document.querySelectorAll('.prayer-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const prayerName = this.querySelector('h3').textContent.split(' ')[1];
+                const targetBlock = Array.from(document.querySelectorAll('.block-header')).find(header => 
+                    header.textContent.includes(prayerName)
+                );
+                if (targetBlock) {
+                    targetBlock.parentElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
