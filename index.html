@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,37 +118,37 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
-        .block.sleep { 
+        .block.sleep {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #f1f5f9;
             border: 1px solid rgba(139, 92, 246, 0.2);
         }
-        
-        .block.morning { 
+
+        .block.morning {
             background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
             color: #f1f5f9;
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
-        
-        .block.afternoon { 
+
+        .block.afternoon {
             background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 100%);
             color: #f1f5f9;
             border: 1px solid rgba(6, 182, 212, 0.3);
         }
-        
-        .block.evening { 
+
+        .block.evening {
             background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
             color: #f1f5f9;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        
-        .block.night { 
+
+        .block.night {
             background: linear-gradient(135deg, #701a75 0%, #86198f 100%);
             color: #f1f5f9;
             border: 1px solid rgba(168, 85, 247, 0.3);
         }
-        
-        .block.prayer { 
+
+        .block.prayer {
             background: linear-gradient(135deg, #14532d 0%, #166534 100%);
             color: #f0fdf4;
             border: 2px solid #10b981;
@@ -285,25 +286,60 @@
             z-index: 1000;
         }
 
+        #currentActivity {
+            position: fixed;
+            top: 20px;
+            /* so it doesn’t overlap with current time */
+            left: 20px;
+            right: auto;
+            /* override right */
+            width: auto;
+            background: rgba(30, 41, 59, 0.9);
+            color: #f1f5f9;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
                 margin: 10px;
             }
-            
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .activities {
                 grid-template-columns: 1fr;
+            }
+
+            .current-time,
+            .current-activity {
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .current-activity {
+                top: 60px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="current-time" id="currentTime"></div>
-    
+    <div class="current-activity" id="currentActivity">Current Activity: Loading...</div>
+
     <div class="container">
         <div class="header">
             <h1>🕌 Daily Prayer-Based Schedule</h1>
@@ -479,7 +515,8 @@
                     </div>
                     <div class="activity">
                         <div class="activity-time">9:30–10:00 PM</div>
-                        <div class="activity-task"><strong>Meal 4 (Post-workout)</strong> - Lean meat + sweet potato</div>
+                        <div class="activity-task"><strong>Meal 4 (Post-workout)</strong> - Lean meat + sweet potato
+                        </div>
                     </div>
                     <div class="activity">
                         <div class="activity-time">10:00–11:00 PM</div>
@@ -543,25 +580,66 @@
     </div>
 
     <script>
-        function updateTime() {
+        function updateTimeAndActivity() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
+            // Adjust for PKT (UTC+5)
+            const pktOffset = 5 * 60; // PKT is UTC+5 in minutes
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const pktTime = new Date(utc + (pktOffset * 60000));
+
+            const timeString = pktTime.toLocaleTimeString('en-US', {
                 hour12: true,
                 hour: 'numeric',
                 minute: '2-digit',
                 second: '2-digit'
             });
             document.getElementById('currentTime').textContent = timeString;
+
+            const hours = pktTime.getHours();
+            const minutes = pktTime.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+
+            const schedule = [
+                { time: "1:00 AM", minutes: 60, activity: "Core Sleep (4 hrs) - Deep rest period" },
+                { time: "5:00 AM", minutes: 300, activity: "Fajr Prayer - Morning prayer and meditation" },
+                { time: "5:30 AM", minutes: 330, activity: "Sleep (4.5 hrs) - Post-Fajr top-up rest" },
+                { time: "10:00 AM", minutes: 600, activity: "Meal 1 - 3 eggs + oats omelette" },
+                { time: "10:30 AM", minutes: 630, activity: "Learning - MERN/AI course + podcast" },
+                { time: "12:00 PM", minutes: 720, activity: "Work Block 1 - Focused deep work" },
+                { time: "1:30 PM", minutes: 810, activity: "Zuhr Prayer - Afternoon prayer and reflection" },
+                { time: "2:00 PM", minutes: 840, activity: "Meal 2 - Chicken/fish, rice/quinoa, veggies" },
+                { time: "2:30 PM", minutes: 870, activity: "Work Block 2 - Main work chunk (3 hrs)" },
+                { time: "5:30 PM", minutes: 1050, activity: "Asr Prayer - Late afternoon prayer" },
+                { time: "6:00 PM", minutes: 1080, activity: "Work Block 3 - Admin tasks and wrap-up" },
+                { time: "7:00 PM", minutes: 1140, activity: "Maghrib Prayer - Evening prayer at sunset" },
+                { time: "7:30 PM", minutes: 1170, activity: "Meal 3 (Pre-workout) - 2 banana, 2 bread + PB" },
+                { time: "8:00 PM", minutes: 1200, activity: "Gym Session - Physical exercise and fitness" },
+                { time: "9:30 PM", minutes: 1290, activity: "Meal 4 (Post-workout) - Lean meat + sweet potato" },
+                { time: "10:00 PM", minutes: 1320, activity: "Work Block 4 - Final wrap-up tasks" },
+                { time: "11:00 PM", minutes: 1380, activity: "Spare Time - Relax, light screen/family time" },
+                { time: "12:30 AM", minutes: 1470, activity: "Isha Prayer - Night prayer before sleep" },
+                { time: "1:00 AM", minutes: 1500, activity: "Core Sleep (4 hrs) - Deep rest period" }
+            ];
+
+            let currentActivity = schedule[0].activity; // Default to first activity
+            for (let i = 0; i < schedule.length - 1; i++) {
+                if (totalMinutes >= schedule[i].minutes && totalMinutes < schedule[i + 1].minutes) {
+                    currentActivity = schedule[i].activity;
+                    break;
+                }
+            }
+
+            document.getElementById('currentActivity').textContent = `Current Activity: ${currentActivity}`;
         }
 
-        updateTime();
-        setInterval(updateTime, 1000);
+        updateTimeAndActivity();
+        setInterval(updateTimeAndActivity, 1000);
 
         // Add smooth scrolling for better user experience
         document.querySelectorAll('.prayer-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function () {
                 const prayerName = this.querySelector('h3').textContent.split(' ')[1];
-                const targetBlock = Array.from(document.querySelectorAll('.block-header')).find(header => 
+                const targetBlock = Array.from(document.querySelectorAll('.block-header')).find(header =>
                     header.textContent.includes(prayerName)
                 );
                 if (targetBlock) {
@@ -574,4 +652,5 @@
         });
     </script>
 </body>
+
 </html>
